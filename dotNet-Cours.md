@@ -104,6 +104,7 @@ La convention veut qu'une interface commence par un **i majuscule**.
 Pas de convention sur les classes abstraites. Peuvent être notées A, mais rien de consensuel.
 
 Mot clef **base** remplace **super** pour appeler les méthodes ou attributs parents.
+
 <br>
 
 #### Types génériques
@@ -130,6 +131,15 @@ internal interface IAnimal<T> where T : INourriture
 
 #### Les collections : List
 On utilisera essentiellement la List. Permettra toutes les modifications dynamiques.
+
+Les HashSet empêchent la duplication d'éléments.
+Les dictionnaires seront un ensemble de clef/valeur
+
+<br>
+
+#### Les records
+Sont en lecture seules et sont concus pour faciliter le transfèrt de données.
+
 <br>
 
 #### Methodes d'extension
@@ -144,6 +154,7 @@ public static class Extension
     }
 }
 ```
+
 <br>
 
 #### Les fonctions : Func
@@ -155,4 +166,30 @@ Similaires aux fonctions, ne retournent rien.
 Dans les deux cas : prennent jusqu'à 16 paramètres max.
 
 On peut overrider les opérateurs mathématiques et ceux de cast. Cela permettra par exemple d'additionner deux classes entre elles avec un "+".
- 
+
+#### Interpolation de chaine
+``` csharp
+ $"Rectangle de longueur {Longueur} et de largeur {Largeur}\n Aire : {Aire()} \n Perimetre {Perimetre()}\n";
+ ```
+
+#### Line Break
+On peut utiliser Environment.NewLine en lieu et place de \n afin d'adapter le retour chariot à l'OS de destination.
+
+<br>
+
+### LINQ - Streams
+**L**anguage **IN**tegrated **Q**uery
+Deux syntaxes possibles : 
+- requête (proche SQL)
+- méthode (lambda)
+
+Méthodes permettant de récupérer des éléments :
+- First et FirstOrDefault
+- Where : equivalent de Filter en stream
+- Distinct
+- Skip/Take : utilisés pour la pagination de tableau (ex. dans une lsite de 10 éléments, chaque page faisant 2 élements, pour accéder à la page 2 on skip 2 éléments et on take les deux suivants)
+
+Méthodes permettant de trier des éléments :
+- OrderBy
+- Vérifier des conditions All et Any
+- Transformaer une collection : select et selectMany
