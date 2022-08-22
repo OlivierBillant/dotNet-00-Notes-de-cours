@@ -65,3 +65,7 @@ Exemple d'instanciation :
 Personne personne = new Personne {Nom = "MARTIN", Prenom = "JEAN"};
 ```
 
+Création de classe : se placer sur le projet/ajouter/classe
+
+
+
