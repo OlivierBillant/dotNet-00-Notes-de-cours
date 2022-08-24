@@ -234,6 +234,8 @@ N.B. Toutes ces méthodes reposent sur des boubles qui vont parcourir les listes
 
 ## Développement Web en ASP.NET
 
+Les annotations de Java on leur équivalent en dotNet avec les **[ attributs ]** qui s'écrivent entre "[ ]".  
+
 ### Structure du projet Web
 On retrouvera les désormais classiques :
 - Models
@@ -248,4 +250,32 @@ Auquel s'ajoutent :
 ```
 N.B. Tous les projets écrits en dotNet s'exécuteront nativement.
 ```
+
+Par défault, le fw propose de créer les modalités d'authentification et d'activer Docker.
+
+1. Creation d'un builder d'application web
+2. Configuration app
+3. Construction app
+4. Run
+
+DotNet fourni un système de pipeline et de middleware pour gérer l'avant et l'après exécution d'une requête.  
+
+**Razor** : équivalent de Thymeleaf ou Twig.
+
+#### Controller
+ViewData (préférer celui ci) ou ViewBag permettent de transférer des données entre M-V en dehors des besoins liés à la page (*e.g.* liste externe).
+
+On peut définir précisément une route pour chaque action pour prévoir par exemple des accès par id.
+
+#### View et syntaxe Razor
+Les fichiers cshtml fonctionneront comme une classe.  
+Aussi les variables déclarées y resteront accessibles, des méthodes peuvent y être créees etc...  
+Les @ de début de vue vont permettre de passer des atrtibuts, des usings...  
+Le plus souvent on passera ainsi des listes d'objets en tant que models.  
+```
+Toutes les vues auront du model : 
+    - déclaration : @ model.blabla
+    - utilisation : @ Model.blabla
+```
+
 
