@@ -278,4 +278,173 @@ Toutes les vues auront du model :
     - utilisation : @ Model.blabla
 ```
 
+Le fw permet de créer automatiquement les controllers pour un objet/ViewModel qui proposera autmatiquement les actions d'affichage en GET et la partie POST pour modification et récupération des informations.
 
+Les vues partielles permettent de mutualiser des éléments entre plusieurs vues. Il s'agit d'une vue non-soumise au layout et est forcément préfixée par un "_" et sont liées à une modèle.
+``` csharp
+@await this.Html.PartialASync.("_ClassName", this.Model) 
+```
+
+Validation : se fera avec des attributs.
+
+Structuration des projets DotNet
+Les différentes couches d'une solution seront séparées en projets.
+Clic droit sur un projet et ajouter référence de projet.
+
+Injection de dépendance : se fera **uniquement dans les controllers**
+L'utilisation ne se fera pas en annotation avec  @Autiwired et @Services mais en utilsiant dans Program.cs :
+
+``` csharp
+builder.Services.AddTransient<NomDuService>();
+builder.Services.AddSingleton<SingletonService>();
+```
+
+### Entity Framework
+ORM : Object Relational Mapping permet la liaison entre les tables de données et les classes.
+
+Différentes approches possibles : 
+- Database First : si la db existe déjà. Permettra de générer les modèles à partir des données pré-existantes.
+- Model First : déprécié
+- Code First : Génération de la db à partir du code c# (80% des projets)
+
+#### DbContext
+Objet représentant notre base de donnée. Contiendra tous les champs, les relations et la définition de la chaine de connexion dans App.conf/Json.
+Classe abstraite qui devra être héritée.
+
+- DbSet : représente les données d'une table sous forme d'énumérable.
+- Linq pour manipuler le slistes
+- SaveChanges pour enregistrer les changements
+
+<br>
+
+1. Créer un projet
+2. Ajouter les dépendances NuGet : 
+    - MSEntityFrameworkCore
+    - Provider spécifique de la base de donnée (SqlLite à mettre par défaut)
+    - .Design pour le design sql des migrations
+3. Création classe Context héritant de DbContext
+4. Création d'entités (modèles de db)  
+    Par défaut, EF prendra Id comme la PK.
+    Gestion des nullable : expliciter la gestion des nullables de la façon suivante avec l'annotation "Required":
+    ``` csharp
+    [Required]
+    public string Nom {get ; set}
+    ```
+5. Création d'un DbSet dans Context
+    ``` csharp
+    public DbSet<Personne> Personne => this.Set<Personne>();
+    ```
+    N.B. Le type Set disposera des méthodes LinQ (IEnum) et SaveChanges()
+6. Dans Program.cs : création d'une instance de Context
+7.  ``` csharp
+    await context.Database.EnsureCreatedAsync();
+    ```
+
+
+#### Async Await
+Par défaut, les codes sont synchrones. Dans le cas d'un traitement long, l'étape la plus longue conditionnera la longueur du programme. Il s'agira en général des appels aux services externes impliquant une certaine variabilité environnementale (réseau ,API etc...)
+
+- Toutes les méthodes utilsiées dans l'EF sont asynchrones.
+- Toute méthode doit retourner une Task<>
+- Spécifie un async en début
+- Peut gérer autant d'await que souhaité.
+
+
+#### Migrations
+Problèmatique importante de la gestion des mises à jour sous forme de migration.
+- Ajout migration : Add-Migration NOM
+- Appliquer migration : Uptade-Database
+- Annuler migration : Uptade-Database -TargetMigration PRECEDENTE_MIGRATION
+- Générer script de maj : Update-Database -Script
+
+#### Relations entre entités
+Les liens sont crées en ajoutant l'attribut à la classe.
+On peut ajouter le mot clef virtua lavant le type si on demande du lazy loading (vs. eager loading)
+
+Ex.
+``` powershell
+dotnet tool install dotnet-ef -g
+```
+Toute migration contient 2 méthodes : Up and Down.
+
+#### CRUD
+Dans un DbSet on retrouvera par défaut un Find(int id) mais qui est peu utilsiée irl.
+``` csharp
+DbSet<Personne> personne
+var personne = context.Personne.Find(1);
+```
+Création d'enttié : 
+- création d'instance de Personne
+- Ajout au DbSet
+- SaveChanges()
+
+Modification d'entité :
+- Récupérer l'entité (Find)
+- Modifier l'attribut
+- SaveChanges()
+
+Génération de controller + View avec EF.
+
+#### Fluent API
+- Annotation : règle de modele. Ne permet pas toutes les modifications.
+- Fluent API : design pattern utilisable pour configurer des entités par code.
+    - EF va par défaut mettre les tables au pluriel.
+    - Définir des noms de colonne
+    - Exclure un champ de la db
+
+-Les relations : permet de configurer les relations.
+
+#### Loading
+3 façons de charge :
+- LazyLoading (default)
+- ExplicitLoading (lourd et peu utilisé)
+- Eager : context.ObjectInclude(o => o.atrtibut) permet d'inclure des sous-objets d'une entité.
+Par défault les objets seront chargés sans leurs relations. 
+
+#### Gestion des ressources
+La porté d'une connexion sera limitée à une méthode par exemple en utilsiant : using var context = new LoadingContext().
+Using s'assurera de la fermeture de la connexion à l'échéance de la méthode.
+
+#### Etat EntityState
+Enumération contenant les statuts d'une entité : Added, Unchanged, Modified, Deleted, Detached.
+
+#### Notes TP Final Dojo
+Connexion provider
+``` json
+Server=170SE3-9Q205M2;Database=Dojo;User Id=sa;Password=Pa$$w0rd;
+```
+
+``` powershell
+dotnet ef migrations add <nom_de_la_migration> -p <chemin_du_projet_dal>
+dotnet ef migrations add Creation -p ..\DotNet.06.TP5Dojo.Dal\
+dotnet ef database update
+```
+
+```csharp
+ <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.8" />
+  </ItemGroup>
+```
+
+Pour rendre les services injectables, il va falloire créer des méthodes d'extension dans les couches 
+public static DalExtensions
+public static void AddServices (this.IServiceCollection services)
+add corresponding services originally in program
+
+## API
+### Définition
+L'API s'adressera à une machine au lieu de l'humain.
+Le format d'envoi des données n'est pas figé, mais le dominé par le JSON.  
+Les controlleurs hériteront de ControllerBase et attribués par [ApiController]  
+Les objets seront par défaut renvoyés en Json.  
+Swagger pour tester à la Postman.
